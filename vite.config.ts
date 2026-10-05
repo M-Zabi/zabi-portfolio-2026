@@ -18,14 +18,14 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2022',
     cssCodeSplit: true,
-    // three.js (~575 kB raw / ~145 kB gzip) is its own chunk, fetched on demand by the hero
+    // three.js (~610 kB raw / ~150 kB gzip) is its own chunk, fetched on demand by the hero
     // after first paint — it never sits on the critical path, so it may exceed the default.
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 650,
     rolldownOptions: {
       output: {
         // Keep the heavy, rarely-changing vendors in their own long-cached chunks.
         // three.js is only reached through a dynamic import, so it never blocks first paint.
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             { name: 'three', test: /node_modules[\\/]three[\\/]/ },
             { name: 'motion', test: /node_modules[\\/](motion-v|motion-dom|motion-utils|framer-motion)[\\/]/ },

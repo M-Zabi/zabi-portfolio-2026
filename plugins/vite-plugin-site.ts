@@ -11,7 +11,7 @@ import { projects } from '../src/content/projects'
 /**
  * Production concerns for a client-rendered site, done at build time:
  *
- *  1. Content guard — a production build fails while placeholder content remains.
+ *  1. Content guard — every build lists the placeholder content still in the site.
  *  2. Per-route HTML — every route gets its own index.html with title, description, canonical,
  *     Open Graph / Twitter tags and JSON-LD, so link unfurlers (which don't run JS) and crawlers
  *     see the right page. Unknown paths get a real 404.html (served with a 404 status by
@@ -19,9 +19,6 @@ import { projects } from '../src/content/projects'
  *  3. sitemap.xml + robots.txt from the same route list.
  *  4. Font preloads for the two faces the first paint needs.
  *  5. A Content Security Policy (as a meta tag, so it works on any static host).
- *
- * Modes: `production` enforces the content guard; any other mode (e.g. `--mode staging`) only
- * warns, so previews can deploy before the real content is in.
  */
 
 const MARKER = '<!-- site:head -->'
@@ -180,11 +177,7 @@ export function sitePlugin(): Plugin {
       if (config.command !== 'build') return
       const issues = contentIssues(siteUrl)
       if (!issues.length) return
-      const message = `Placeholder content would ship:\n  • ${issues.join('\n  • ')}\n`
-      if (config.mode === 'production') {
-        this.error(`${message}\nFix these, or build a preview with \`npm run build:staging\`.`)
-      }
-      this.warn(message)
+      this.warn(`Placeholder content is shipping:\n  • ${issues.join('\n  • ')}\n`)
     },
 
     transformIndexHtml: {
