@@ -33,7 +33,8 @@ usePageMeta(pages.about)
 
       <div class="space-y-6 text-lead lg:col-span-6 lg:col-start-7 lg:pt-4">
         <FadeIn as="p">
-          I’m {{ site.name }} — a senior full-stack engineer with {{ yearsOfExperience }}+ years of building products
+          I’m {{ site.name }} — a senior full-stack engineer based in {{ site.home.city }}, {{ site.home.country }},
+          with {{ yearsOfExperience }}+ years of building products
           people use every day: web platforms, React Native apps in both stores, and desktop tools built with Tauri and
           Electron.
         </FadeIn>

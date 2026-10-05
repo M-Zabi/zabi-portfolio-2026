@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import BusinessCard3D from '@/components/business-card/BusinessCard3D.vue'
+import IndiaFlag from '@/components/common/IndiaFlag.vue'
 import LocalTime from '@/components/common/LocalTime.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import StatusDot from '@/components/common/StatusDot.vue'
@@ -45,6 +46,13 @@ usePageMeta(pages.contact)
             <div>
               <dt class="text-label text-muted-foreground">Local time</dt>
               <dd class="mt-2 font-medium"><LocalTime /></dd>
+            </div>
+            <div class="col-span-2">
+              <dt class="text-label text-muted-foreground">Based in</dt>
+              <dd class="mt-2 flex items-center gap-2.5 font-medium">
+                <IndiaFlag class="w-6 shrink-0" />
+                {{ site.home.city }}, {{ site.home.region }}, {{ site.home.country }}
+              </dd>
             </div>
             <div class="col-span-2">
               <dt class="text-label text-muted-foreground">Elsewhere</dt>

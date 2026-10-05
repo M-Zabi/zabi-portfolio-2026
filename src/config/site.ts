@@ -25,7 +25,7 @@ export const site = {
   role: 'Senior Full-stack & Mobile Engineer',
   shortRole: 'Full-stack · React Native · Desktop',
   description:
-    'Senior full-stack engineer building web platforms, React Native apps and Tauri/Electron desktop tools — with smooth workflows and interactive experiences at the core.',
+    'Bengaluru-based senior full-stack engineer building web platforms, React Native apps and Tauri/Electron desktop tools — with smooth workflows and interactive experiences at the core.',
   /**
    * Production origin, no trailing slash. Set VITE_SITE_URL in your host's environment.
    * (`?.` because this file is also evaluated at build time, where import.meta.env is absent.)
@@ -33,10 +33,18 @@ export const site = {
   url: (import.meta.env?.VITE_SITE_URL as string | undefined) ?? 'https://example.com',
   /** TODO: public contact address. */
   email: 'hello@example.com',
-  /** TODO */
-  location: 'Remote · Worldwide',
-  /** IANA zone used by every "local time" readout. TODO: e.g. 'Asia/Karachi', 'Europe/Madrid'. */
-  timeZone: 'UTC',
+  location: 'Bengaluru, India',
+  /** Home base — the footer and contact page (with the flag), the weather report and structured data. */
+  home: {
+    city: 'Bengaluru',
+    region: 'Karnataka',
+    country: 'India',
+    countryCode: 'IN',
+    latitude: 12.9716,
+    longitude: 77.5946,
+  },
+  /** IANA zone used by every "local time" readout — India Standard Time. */
+  timeZone: 'Asia/Kolkata',
   /** TODO: first year you shipped professionally — drives "Est." and years-of-experience copy. */
   startedYear: 2016,
   availability: {

@@ -27,7 +27,11 @@ export const pages = {
     title: 'Work',
     description: 'Selected web, mobile and desktop projects — each with the problem, the approach and the result.',
   },
-  about: { title: 'About', description: `About ${site.name} — ${site.role}.`, type: 'profile' },
+  about: {
+    title: 'About',
+    description: `About ${site.name} — ${site.role} based in ${site.home.city}, ${site.home.country}.`,
+    type: 'profile',
+  },
   contact: { title: 'Contact', description: `Start a project with ${site.name}. ${site.replyTime}.` },
   notFound: { title: 'Not found', description: 'This page doesn’t exist — it may have moved.' },
 } satisfies Record<string, PageMeta>

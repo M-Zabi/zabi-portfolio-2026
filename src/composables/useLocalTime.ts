@@ -15,9 +15,10 @@ export const useLocalTime = createSharedComposable(() => {
     timeZone: site.timeZone,
   })
 
-  const zoneFormat = new Intl.DateTimeFormat('en-US', {
+  // en-IN names India Standard Time "IST"; other zones still get a readable short name.
+  const zoneFormat = new Intl.DateTimeFormat('en-IN', {
     timeZone: site.timeZone,
-    timeZoneName: 'shortOffset',
+    timeZoneName: 'short',
   })
 
   const time = computed(() => timeFormat.format(now.value))

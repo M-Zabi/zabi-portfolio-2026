@@ -54,7 +54,7 @@ function shuffleFromCard() {
       <div class="flex flex-1 items-center justify-center py-12 lg:py-16">
         <!-- The 4s share the card's grid row, so they centre on the card rather than card + caption. -->
         <figure
-          class="grid w-full justify-items-center gap-y-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-[2.5vw]"
+          class="grid w-full grid-cols-1 justify-items-center gap-y-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-[2.5vw]"
         >
           <FadeIn
             :delay="0.05"
@@ -145,6 +145,8 @@ function shuffleFromCard() {
   font-weight: 760;
   font-stretch: 80%;
   line-height: 0.74;
+  /* Digits sit low in the line box; lift them so they centre optically on the card. */
+  translate: 0 -0.03em;
   user-select: none;
 }
 

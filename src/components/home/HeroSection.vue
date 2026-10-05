@@ -113,7 +113,8 @@ function scrollToContent() {
             </p>
           </div>
           <p class="mt-5 text-lead text-balance">
-            Web platforms, React Native apps and desktop tools — built for clarity, speed and feel.
+            Web platforms, React Native apps and desktop tools — built in {{ site.home.city }}, {{ site.home.country }},
+            for clarity, speed and feel.
           </p>
         </FadeIn>
       </div>

@@ -7,6 +7,7 @@ import { documentTitle, ogImage, type PageMeta, pages, projectPage } from '../sr
 import { site } from '../src/config/site'
 import { experience, testimonials } from '../src/content/profile'
 import { projects } from '../src/content/projects'
+import { WEATHER_ENDPOINT } from '../src/services/weather'
 
 /**
  * Production concerns for a client-rendered site, done at build time:
@@ -107,6 +108,12 @@ function structuredData(siteUrl: string): string {
         description: site.description,
         url: `${siteUrl}/`,
         email: `mailto:${site.email}`,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: site.home.city,
+          addressRegion: site.home.region,
+          addressCountry: site.home.countryCode,
+        },
         sameAs: site.socials.map((social) => social.href),
       },
       { '@type': 'WebSite', '@id': `${siteUrl}/#website`, url: `${siteUrl}/`, name: site.name, publisher: { '@id': `${siteUrl}/#person` } },
@@ -117,7 +124,8 @@ function structuredData(siteUrl: string): string {
 }
 
 function contentSecurityPolicy(contactEndpoint: string | undefined): string {
-  let connect = "'self'"
+  // The footer's weather report (src/services/weather.ts) reads from Open-Meteo.
+  let connect = `'self' ${new URL(WEATHER_ENDPOINT).origin}`
   if (contactEndpoint) {
     try {
       connect += ` ${new URL(contactEndpoint).origin}`

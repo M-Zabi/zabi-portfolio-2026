@@ -4,12 +4,14 @@ import { useClipboard } from '@vueuse/core'
 import { AnimatePresence, motion } from 'motion-v'
 import { toast } from 'vue-sonner'
 
+import IndiaFlag from '@/components/common/IndiaFlag.vue'
 import LocalTime from '@/components/common/LocalTime.vue'
 import StatusDot from '@/components/common/StatusDot.vue'
 import CelestialToggle from '@/components/footer/CelestialToggle.vue'
 import FooterCtaBadge from '@/components/footer/FooterCtaBadge.vue'
 import FooterMarquee from '@/components/footer/FooterMarquee.vue'
 import FooterSky from '@/components/footer/FooterSky.vue'
+import FooterWeather from '@/components/footer/FooterWeather.vue'
 import ForestScene from '@/components/footer/ForestScene.vue'
 import FadeIn from '@/components/motion/FadeIn.vue'
 import RevealText from '@/components/motion/RevealText.vue'
@@ -110,7 +112,19 @@ async function copyEmail() {
           <p class="mt-3 font-display text-2xl font-semibold"><LocalTime /></p>
         </FadeIn>
 
+        <FadeIn :delay="0.3">
+          <FooterWeather />
+        </FadeIn>
+
         <FadeIn :delay="0.34">
+          <p class="text-label opacity-60">Based in</p>
+          <p class="mt-3 flex items-start gap-2.5 text-sm font-medium">
+            <IndiaFlag class="mt-0.5 w-6 shrink-0" />
+            <span>{{ site.home.city }}, {{ site.home.region }}, {{ site.home.country }}</span>
+          </p>
+        </FadeIn>
+
+        <FadeIn :delay="0.38">
           <p class="text-label opacity-60">Status</p>
           <p class="mt-3 flex items-start gap-2.5 text-sm font-medium">
             <StatusDot class="mt-1.5" />
