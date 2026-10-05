@@ -44,61 +44,78 @@ function shuffleFromCard() {
         :y="10"
         class="flex items-center justify-between gap-6 border-b border-border py-5 text-label text-muted-foreground"
       >
-        <p>(404) Lost in transit</p>
-        <p class="min-w-0 truncate">
+        <p class="shrink-0">(404) Lost in transit</p>
+        <p class="hidden min-w-0 truncate sm:block">
           <span aria-hidden="true">GET </span><span class="sr-only">Requested path: </span
           >{{ route.path }}
         </p>
       </FadeIn>
 
       <div class="flex flex-1 items-center justify-center py-12 lg:py-16">
-        <div class="flex w-full items-center justify-center gap-[2.5vw]">
-          <FadeIn :delay="0.05" :y="48" class="four hidden lg:block" aria-hidden="true">4</FadeIn>
+        <!-- The 4s share the card's grid row, so they centre on the card rather than card + caption. -->
+        <figure
+          class="grid w-full justify-items-center gap-y-6 lg:grid-cols-[1fr_auto_1fr] lg:items-center lg:gap-x-[2.5vw]"
+        >
+          <FadeIn
+            :delay="0.05"
+            :y="48"
+            class="four hidden lg:block lg:justify-self-end"
+            aria-hidden="true"
+          >
+            4
+          </FadeIn>
 
-          <figure class="flex w-[min(100%,30rem)] flex-col gap-6 lg:w-[clamp(18rem,30vw,30rem)]">
-            <FadeIn :delay="0.15" :y="32">
-              <div aria-live="polite">
-                <AnimatePresence mode="wait" :initial="false">
-                  <motion.div
-                    :key="meme.id"
-                    class="relative"
-                    :initial="{ opacity: 0, y: -28, rotate: -9 }"
-                    :animate="{ opacity: 1, y: 0, rotate: -2 }"
-                    :exit="{ opacity: 0, x: 72, rotate: 10 }"
-                    :while-hover="{ rotate: 0 }"
-                    :transition="{ duration: 0.3, ease: ease.outQuint }"
-                  >
-                    <MemeCard :meme="meme" @shuffle="shuffleFromCard" />
-                    <span class="tape" aria-hidden="true" />
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </FadeIn>
+          <FadeIn :delay="0.15" :y="32" class="meme-width">
+            <div aria-live="polite">
+              <AnimatePresence mode="wait" :initial="false">
+                <motion.div
+                  :key="meme.id"
+                  class="relative"
+                  :initial="{ opacity: 0, y: -28, rotate: -9 }"
+                  :animate="{ opacity: 1, y: 0, rotate: -2 }"
+                  :exit="{ opacity: 0, x: 72, rotate: 10 }"
+                  :while-hover="{ rotate: 0 }"
+                  :transition="{ duration: 0.3, ease: ease.outQuint }"
+                >
+                  <MemeCard :meme="meme" @shuffle="shuffleFromCard" />
+                  <span class="tape" aria-hidden="true" />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </FadeIn>
 
-            <FadeIn
-              as="figcaption"
-              :delay="0.3"
-              :y="12"
-              class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
+          <FadeIn
+            :delay="0.25"
+            :y="48"
+            class="four hidden lg:block lg:justify-self-start"
+            aria-hidden="true"
+          >
+            4
+          </FadeIn>
+
+          <FadeIn
+            as="figcaption"
+            :delay="0.3"
+            :y="12"
+            class="meme-width flex items-center justify-between gap-6 lg:col-start-2"
+          >
+            <!-- Two fixed lines, so a long meme name never reflows the row and nudges the card. -->
+            <span class="min-w-0 text-label text-muted-foreground tabular">
+              <span class="block">Meme {{ count(index + 1) }} / {{ count(memes.length) }}</span>
+              <span class="block truncate text-foreground">{{ meme.name }}</span>
+            </span>
+            <button
+              ref="shuffleButton"
+              type="button"
+              :class="buttonVariants({ variant: 'outline', size: 'pill' })"
+              class="shrink-0 border-foreground/20 font-mono [font-stretch:90%]"
+              @click="shuffle"
             >
-              <span class="text-label text-muted-foreground tabular">
-                Meme {{ count(index + 1) }}/{{ count(memes.length) }} · {{ meme.name }}
-              </span>
-              <button
-                ref="shuffleButton"
-                type="button"
-                :class="buttonVariants({ variant: 'outline', size: 'pill' })"
-                class="font-mono [font-stretch:90%]"
-                @click="shuffle"
-              >
-                <ShuffleIcon aria-hidden="true" />
-                Another one
-              </button>
-            </FadeIn>
-          </figure>
-
-          <FadeIn :delay="0.25" :y="48" class="four hidden lg:block" aria-hidden="true">4</FadeIn>
-        </div>
+              <ShuffleIcon aria-hidden="true" />
+              Another one
+            </button>
+          </FadeIn>
+        </figure>
       </div>
     </div>
 
@@ -128,8 +145,17 @@ function shuffleFromCard() {
   font-weight: 760;
   font-stretch: 80%;
   line-height: 0.74;
-  letter-spacing: -0.06em;
   user-select: none;
+}
+
+.meme-width {
+  width: min(100%, 30rem);
+}
+
+@media (width >= 64rem) {
+  .meme-width {
+    width: clamp(18rem, 30vw, 30rem);
+  }
 }
 
 /* A strip of tape holding the card to the page. */

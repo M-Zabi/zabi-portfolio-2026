@@ -198,21 +198,27 @@ const flames = [13, 18, 15, 21, 16, 19, 14]
     </div>
 
     <!-- Change my mind -->
-    <div v-else class="flex h-full flex-col justify-end p-[7cqw]">
-      <div
-        class="mx-auto w-[90%] -rotate-2 rounded-[1.2cqw] bg-paper p-[6cqw] text-ink shadow-[0_1.6cqw_0_oklch(0_0_0/0.35)]"
-      >
-        <p class="font-display text-[6.4cqw] leading-[1.1] text-balance">{{ meme.claim }}</p>
-        <p
-          class="mt-[4cqw] font-display text-[10cqw] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase [font-stretch:88%]"
-        >
-          {{ meme.dare }}
-        </p>
+    <div v-else class="flex h-full flex-col p-[7cqw]">
+      <p class="font-mono text-[3.2cqw] tracking-[0.06em] uppercase opacity-60">
+        Hot take, held firmly
+      </p>
+      <!-- The sign and the mug stand on the table. -->
+      <div class="mt-auto flex items-end gap-[4cqw] px-[2cqw]">
+        <div class="flex-1 -rotate-2 rounded-[1.2cqw] bg-paper p-[5.5cqw] text-ink">
+          <p class="font-display text-[6cqw] leading-[1.1] text-balance">{{ meme.claim }}</p>
+          <p
+            class="mt-[3.5cqw] font-display text-[9.4cqw] leading-[0.9] font-extrabold tracking-[-0.03em] uppercase [font-stretch:88%]"
+          >
+            {{ meme.dare }}
+          </p>
+        </div>
+        <CoffeeIcon
+          class="mb-[0.4cqw] size-[13cqw] shrink-0"
+          :stroke-width="1.5"
+          aria-hidden="true"
+        />
       </div>
-      <div class="relative mt-[6cqw]" aria-hidden="true">
-        <CoffeeIcon class="absolute right-[6cqw] bottom-full size-[12cqw]" :stroke-width="1.5" />
-        <span class="block h-[2.4cqw] rounded-full bg-paper/25" />
-      </div>
+      <span class="mt-[1.2cqw] block h-[2.4cqw] rounded-full bg-paper/25" aria-hidden="true" />
     </div>
   </div>
 </template>
