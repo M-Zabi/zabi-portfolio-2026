@@ -210,6 +210,24 @@ export const rotation: Track[] = [
   { title: 'Elden Ring', artist: 'Tsukasa Saitoh · Elden Ring', duration: 222, color: 'ember', sample: true },
 ]
 
+/** Gaming one-liners that decode one after another at the top right of the hero — keep them short. */
+export const oneLiners = [
+  '55 60 W, 37 33 E.',
+  'The Spear. Alcatraz.',
+  'Watch the spear.',
+  'Wake up, Samurai.',
+  'Rush B, no stop.',
+  'Wind’s howling.',
+  'Arise, ye Tarnished.',
+  'GG. Queue again.',
+  'Wolves asleep,',
+  'Amidst the tree',
+  'Bats all are swaying',
+  'in the breeze',
+  'In brightest day',
+  'in darkest night',
+]
+
 /** Short enough to sit in a small hero tile — three lines at most; `origin` reads as "(Japanese proverb)". */
 export const proverbs: Proverb[] = [
   { text: 'Fall seven times, stand up eight.', origin: 'Japanese' },

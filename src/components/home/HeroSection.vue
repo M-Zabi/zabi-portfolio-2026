@@ -10,9 +10,11 @@ import StatusDot from '@/components/common/StatusDot.vue'
 import FadeIn from '@/components/motion/FadeIn.vue'
 import RevealText from '@/components/motion/RevealText.vue'
 import RotatingWord from '@/components/motion/RotatingWord.vue'
+import ScrambleText from '@/components/motion/ScrambleText.vue'
 import { getLenis } from '@/composables/useLenis'
 import { usePageReady } from '@/composables/usePageReady'
 import { site, yearsOfExperience } from '@/config/site'
+import { oneLiners } from '@/content/profile'
 import { ease } from '@/lib/motion'
 
 import HeroWidgets from './widgets/HeroWidgets.vue'
@@ -24,6 +26,7 @@ const pageReady = usePageReady()
 const reducedMotion = useReducedMotion()
 const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const rotating = ref(false)
+const holdLine = ref(false)
 
 const words = ['alive', 'effortless', 'native', 'inevitable', 'fast']
 
@@ -62,15 +65,21 @@ function scrollToContent() {
             {{ site.role }}
           </FadeIn>
           <FadeIn :y="10" :delay="0.1">
+            <!-- Gaming one-liners decode in turn; hovering or focusing holds the current one. -->
             <RouterLink
               to="/about#off-the-clock"
               class="group/play text-label -my-3 inline-flex min-h-11 items-center gap-2 text-muted-foreground transition-colors duration-300 hover:text-foreground"
+              aria-label="Off the clock, I’m a PC gamer — more on the About page"
+              @pointerenter="holdLine = true"
+              @pointerleave="holdLine = false"
+              @focus="holdLine = true"
+              @blur="holdLine = false"
             >
               <Gamepad2Icon
-                class="size-4 transition-transform duration-500 ease-out-expo group-hover/play:-rotate-12"
+                class="size-4 shrink-0 transition-transform duration-500 ease-out-expo group-hover/play:-rotate-12"
                 aria-hidden="true"
               />
-              Off the clock: PC gamer
+              <ScrambleText :words="oneLiners" :active="pageReady && !holdLine" />
               <ArrowRightIcon
                 class="size-3 -translate-x-1 opacity-0 transition duration-300 ease-out-quint group-hover/play:translate-x-0 group-hover/play:opacity-100"
                 aria-hidden="true"
