@@ -5,7 +5,7 @@ import { type IndexHtmlTransformContext, loadEnv, type Plugin, type ResolvedConf
 
 import { documentTitle, ogImage, type PageMeta, pages, projectPage } from '../src/config/seo'
 import { site } from '../src/config/site'
-import { experience, games, rig, testimonials } from '../src/content/profile'
+import { experience, games, rig, rotation, testimonials } from '../src/content/profile'
 import { projects } from '../src/content/projects'
 import { WEATHER_ENDPOINT } from '../src/services/weather'
 
@@ -65,6 +65,7 @@ export function contentIssues(siteUrl: string): string[] {
     [experience.filter((item) => item.sample).length, 'sample experience entries', 'src/content/profile.ts'],
     [games.filter((item) => item.sample).length, 'sample games', 'src/content/profile.ts'],
     [rig.filter((item) => item.sample).length, 'sample rig parts', 'src/content/profile.ts'],
+    [rotation.filter((item) => item.sample).length, 'sample tracks', 'src/content/profile.ts'],
   ] as const
   for (const [count, label, file] of samples) {
     if (count > 0) issues.push(`${count} ${label} still marked \`sample: true\` — replace or delete them in ${file}`)

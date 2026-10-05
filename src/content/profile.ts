@@ -2,9 +2,11 @@ import type {
   ExperienceEntry,
   Game,
   Principle,
+  Proverb,
   RigPart,
   Service,
   Testimonial,
+  Track,
 } from '@/types/content'
 import type { TechName } from '@/lib/tech-icons'
 
@@ -199,6 +201,22 @@ export const rig: RigPart[] = [
   { label: 'Storage', value: '2 TB NVMe Gen4', sample: true },
   { label: 'Display', value: '27″ 1440p OLED · 240 Hz', sample: true },
   { label: 'Inputs', value: 'Wooting 60HE · G Pro X Superlight 2', sample: true },
+]
+
+/** PLACEHOLDER — what's on repeat, shown in the hero's music widget. */
+export const rotation: Track[] = [
+  { title: 'Never Fade Away', artist: 'SAMURAI · Cyberpunk 2077', duration: 287, color: 'volt', sample: true },
+  { title: 'Kaer Morhen', artist: 'Marcin Przybyłowicz · The Witcher 3', duration: 171, color: 'mint', sample: true },
+  { title: 'Elden Ring', artist: 'Tsukasa Saitoh · Elden Ring', duration: 222, color: 'ember', sample: true },
+]
+
+/** Short enough to sit in a small hero tile — three lines at most; `origin` reads as "(Japanese proverb)". */
+export const proverbs: Proverb[] = [
+  { text: 'Fall seven times, stand up eight.', origin: 'Japanese' },
+  { text: 'Drop by drop, an ocean fills.', origin: 'Hindi' },
+  { text: 'A smooth sea never made a skilled sailor.', origin: 'English' },
+  { text: 'Measure twice, cut once.', origin: 'English' },
+  { text: 'Vision without action is a daydream.', origin: 'Japanese' },
 ]
 
 export const marqueeStack = [

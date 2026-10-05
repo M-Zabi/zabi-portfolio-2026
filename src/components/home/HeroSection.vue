@@ -15,7 +15,9 @@ import { usePageReady } from '@/composables/usePageReady'
 import { site, yearsOfExperience } from '@/config/site'
 import { ease } from '@/lib/motion'
 
-/** Press-and-hold anywhere on the hero (outside links) scatters the 3D symbol. */
+import HeroWidgets from './widgets/HeroWidgets.vue'
+
+/** Press-and-hold anywhere on the hero (outside links and the widgets) scatters the 3D symbol. */
 const blast = defineModel<boolean>('blast', { default: false })
 
 const pageReady = usePageReady()
@@ -27,7 +29,7 @@ const words = ['alive', 'effortless', 'native', 'inevitable', 'fast']
 
 function onPointerDown(event: PointerEvent) {
   if (event.button !== 0 || reducedMotion.value) return
-  if ((event.target as Element).closest('a, button, input, textarea, select')) return
+  if ((event.target as Element).closest('a, button, input, textarea, select, [data-hero-widgets]')) return
   blast.value = true
 }
 
@@ -52,7 +54,7 @@ function scrollToContent() {
     aria-labelledby="hero-title"
     @pointerdown="onPointerDown"
   >
-    <div class="container-page flex flex-1 flex-col justify-between gap-14 pt-8 pb-8 lg:pt-12">
+    <div class="container-page flex flex-1 flex-col justify-between gap-10 pt-8 pb-8 lg:pt-12">
       <div>
         <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
           <FadeIn as="p" :y="10" class="text-label flex items-center gap-3 text-muted-foreground">
@@ -98,8 +100,15 @@ function scrollToContent() {
         </FadeIn>
       </div>
 
-      <div class="grid items-end gap-10 md:grid-cols-[1fr_auto_1fr]">
-        <FadeIn :delay="0.7" class="hidden md:block">
+      <div class="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
+        <HeroWidgets class="w-full max-w-2xl lg:w-[min(36rem,52%)] lg:shrink-0" />
+
+        <!-- One fade for the pair: the button alone sits too low to ever count as "in view". -->
+        <FadeIn :delay="0.75" class="hidden flex-col items-center gap-6 xl:flex">
+          <p v-if="finePointer && !reducedMotion" class="text-label text-center text-muted-foreground" aria-hidden="true">
+            Press &amp; hold to <span class="text-primary">scatter</span><br />
+            Move to tilt the light
+          </p>
           <button
             type="button"
             class="grid size-12 place-items-center rounded-full border border-border bg-background/60 backdrop-blur-md transition-colors hover:bg-accent"
@@ -110,18 +119,7 @@ function scrollToContent() {
           </button>
         </FadeIn>
 
-        <FadeIn
-          v-if="finePointer && !reducedMotion"
-          :delay="0.8"
-          class="text-label hidden text-center text-muted-foreground md:block"
-          aria-hidden="true"
-        >
-          Press &amp; hold to <span class="text-primary">scatter</span><br />
-          Move to tilt the light
-        </FadeIn>
-        <span v-else class="hidden md:block" />
-
-        <FadeIn :delay="0.65" class="max-w-sm md:justify-self-end">
+        <FadeIn :delay="0.65" class="max-w-sm">
           <div class="grid grid-cols-[auto_1fr] divide-x divide-border rounded-xl border border-border bg-background/60 backdrop-blur-md">
             <div class="flex flex-col items-center justify-center gap-2 px-5 py-4">
               <GlobeIcon class="size-6 stroke-[1.25]" aria-hidden="true" />

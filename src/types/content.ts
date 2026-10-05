@@ -87,6 +87,21 @@ export interface Game {
   sample?: boolean
 }
 
+export interface Track {
+  title: string
+  artist: string
+  /** Length in seconds — drives the progress bar. */
+  duration: number
+  color: BrandColor
+  /** Illustrative sample content. The production build refuses to ship records marked this way. */
+  sample?: boolean
+}
+
+export interface Proverb {
+  text: string
+  origin: string
+}
+
 export interface RigPart {
   label: string
   value: string
