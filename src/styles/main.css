@@ -1,0 +1,323 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'lenis/dist/lenis.css';
+@import './shadcn.css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ───────────────────────────── Static tokens ───────────────────────────── */
+
+@theme {
+  --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Mona Sans Variable', 'Schibsted Grotesk Variable', ui-sans-serif, sans-serif;
+  --font-heading: var(--font-display);
+  --font-mono: 'Martian Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Fluid display scale — ≥1.25 ratio between steps (DESIGN.md §1 Type, adapted for marketing). */
+  --text-display-xl: clamp(3.25rem, 1.4rem + 7.6vw, 10.5rem);
+  --text-display-xl--line-height: 0.88;
+  --text-display-xl--letter-spacing: -0.045em;
+  --text-display-lg: clamp(2.75rem, 1.5rem + 4.8vw, 6.75rem);
+  --text-display-lg--line-height: 0.92;
+  --text-display-lg--letter-spacing: -0.04em;
+  --text-display-md: clamp(2.125rem, 1.35rem + 3vw, 4.5rem);
+  --text-display-md--line-height: 0.98;
+  --text-display-md--letter-spacing: -0.035em;
+  --text-display-sm: clamp(1.625rem, 1.2rem + 1.5vw, 2.625rem);
+  --text-display-sm--line-height: 1.05;
+  --text-display-sm--letter-spacing: -0.025em;
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.4rem);
+  --text-lead--line-height: 1.5;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
+
+  /* Motion — mirrors src/lib/motion.ts so CSS and JS ease the same way. */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  --animate-marquee: marquee var(--marquee-duration, 32s) linear infinite;
+  --animate-float: float 6s var(--ease-in-out-quart) infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -6px, 0);
+    }
+  }
+}
+
+/* ───────────────────────────── Semantic colour ───────────────────────────── */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand blocks — full, saturated surfaces. Each ships with its own on-colour. */
+  --color-ember: var(--ember);
+  --color-ember-foreground: var(--ember-foreground);
+  --color-volt: var(--volt);
+  --color-volt-foreground: var(--volt-foreground);
+  --color-cobalt: var(--cobalt);
+  --color-cobalt-foreground: var(--cobalt-foreground);
+  --color-mint: var(--mint);
+  --color-mint-foreground: var(--mint-foreground);
+  --color-blush: var(--blush);
+  --color-blush-foreground: var(--blush-foreground);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+  --radius-3xl: calc(var(--radius) + 18px);
+}
+
+/*
+ * Neutrals are tinted toward the ember hue (h≈45–75) so the canvas, hairlines and the
+ * accent read as one family. Chroma drops as lightness approaches the extremes.
+ */
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.975 0.007 75);
+  --foreground: oklch(0.2 0.014 45);
+  --card: oklch(0.993 0.004 75);
+  --card-foreground: oklch(0.2 0.014 45);
+  --popover: oklch(0.993 0.004 75);
+  --popover-foreground: oklch(0.2 0.014 45);
+  --primary: oklch(0.67 0.205 38);
+  --primary-foreground: oklch(0.17 0.02 40);
+  --secondary: oklch(0.93 0.012 70);
+  --secondary-foreground: oklch(0.2 0.014 45);
+  --muted: oklch(0.935 0.01 70);
+  --muted-foreground: oklch(0.47 0.016 50);
+  --accent: oklch(0.925 0.013 70);
+  --accent-foreground: oklch(0.2 0.014 45);
+  --destructive: oklch(0.56 0.21 27);
+  --success: oklch(0.58 0.15 155);
+  --border: oklch(0.885 0.011 70);
+  --input: oklch(0.87 0.012 70);
+  --ring: oklch(0.67 0.205 38);
+
+  --ember: oklch(0.68 0.205 38);
+  --ember-foreground: oklch(0.17 0.02 40);
+  --volt: oklch(0.93 0.18 108);
+  --volt-foreground: oklch(0.2 0.03 110);
+  --cobalt: oklch(0.47 0.2 262);
+  --cobalt-foreground: oklch(0.97 0.012 260);
+  --mint: oklch(0.87 0.12 168);
+  --mint-foreground: oklch(0.2 0.03 170);
+  --blush: oklch(0.84 0.09 12);
+  --blush-foreground: oklch(0.2 0.03 15);
+  --ink: oklch(0.18 0.012 45);
+  --paper: oklch(0.975 0.007 75);
+
+  /* Layout rhythm */
+  --gutter: clamp(1rem, 0.4rem + 2.6vw, 2.5rem);
+  --space-section: clamp(5rem, 2.5rem + 9vw, 11rem);
+  --header-h: 5rem;
+}
+
+.dark {
+  --background: oklch(0.16 0.009 45);
+  --foreground: oklch(0.955 0.008 75);
+  --card: oklch(0.2 0.01 45);
+  --card-foreground: oklch(0.955 0.008 75);
+  --popover: oklch(0.21 0.01 45);
+  --popover-foreground: oklch(0.955 0.008 75);
+  --primary: oklch(0.72 0.19 40);
+  --primary-foreground: oklch(0.17 0.02 40);
+  --secondary: oklch(0.25 0.011 45);
+  --secondary-foreground: oklch(0.955 0.008 75);
+  --muted: oklch(0.24 0.01 45);
+  --muted-foreground: oklch(0.72 0.013 65);
+  --accent: oklch(0.27 0.012 45);
+  --accent-foreground: oklch(0.955 0.008 75);
+  --destructive: oklch(0.68 0.2 25);
+  --success: oklch(0.74 0.15 155);
+  --border: oklch(0.3 0.011 45);
+  --input: oklch(0.34 0.012 45);
+  --ring: oklch(0.72 0.19 40);
+
+  /* Blocks keep their identity in the dark; a touch less chroma stops them vibrating. */
+  --ember: oklch(0.72 0.19 40);
+  --volt: oklch(0.9 0.17 108);
+  --cobalt: oklch(0.55 0.2 262);
+  --mint: oklch(0.82 0.12 168);
+  --blush: oklch(0.8 0.09 12);
+  --ink: oklch(0.13 0.008 45);
+}
+
+/* ───────────────────────────── Base ───────────────────────────── */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+    /*
+     * Backstop: stray horizontal overflow on mobile widens the layout viewport, which
+     * stretches every position:fixed layer (header, WebGL canvas). `clip` — unlike
+     * `hidden` — creates no scroll container, so sticky and Lenis keep working.
+     */
+    overflow-x: clip;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  /* Light type on dark reads thinner — give it a little more air. */
+  .dark body {
+    line-height: 1.6;
+  }
+
+  :where(a, button, [role='button'], summary, input, textarea, select):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--volt);
+    color: var(--volt-foreground);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ───────────────────────────── Utilities ───────────────────────────── */
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1680px;
+  padding-inline: var(--gutter);
+}
+
+@utility section-y {
+  padding-block: var(--space-section);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-stretch: 108%;
+}
+
+@utility text-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  font-stretch: 90%;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Film grain for colour blocks — tactile, not decorative glass. */
+@utility grain {
+  position: relative;
+  isolation: isolate;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.16;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Masked line used by RevealText: clips descenders less aggressively than overflow-hidden on the line box. */
+@utility reveal-mask {
+  display: inline-block;
+  overflow: clip;
+  overflow-clip-margin: 0.08em;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* Theme switch: the new theme is clipped open from the toggle (see useTheme). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ───────────────────────────── Motion safety ───────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

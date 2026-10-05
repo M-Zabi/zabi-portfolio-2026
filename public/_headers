@@ -1,0 +1,22 @@
+# Netlify & Cloudflare Pages response headers (Vercel: see vercel.json).
+# The Content Security Policy itself ships as a <meta> tag in every page (written at build);
+# only directives that cannot live in a meta tag are set here.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin
+
+# Hashed build output never changes — cache it forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Pages and the theme bootstrap must always revalidate so deploys show up immediately.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/theme-init.js
+  Cache-Control: public, max-age=0, must-revalidate
