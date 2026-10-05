@@ -12,6 +12,7 @@ import FooterCtaBadge from '@/components/footer/FooterCtaBadge.vue'
 import FooterMarquee from '@/components/footer/FooterMarquee.vue'
 import FooterSky from '@/components/footer/FooterSky.vue'
 import FooterWeather from '@/components/footer/FooterWeather.vue'
+import KonamiHint from '@/components/footer/KonamiHint.vue'
 import ForestScene from '@/components/footer/ForestScene.vue'
 import FadeIn from '@/components/motion/FadeIn.vue'
 import RevealText from '@/components/motion/RevealText.vue'
@@ -141,7 +142,11 @@ async function copyEmail() {
       <div class="absolute inset-x-0 bottom-0 z-20">
         <div class="container-page text-label flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pb-4 opacity-85">
           <span>© {{ year }} {{ site.fullName }}</span>
-          <span class="hidden sm:inline">Vue · motion · three.js · a jaguar</span>
+          <span class="hidden items-center gap-3 sm:inline-flex">
+            Vue · motion · three.js · a jaguar
+            <span class="opacity-40" aria-hidden="true">/</span>
+            <KonamiHint />
+          </span>
           <button type="button" class="roll-trigger group/top inline-flex min-h-11 items-center gap-2 uppercase" @click="scrollToTop()">
             <RollingText text="Back to top" />
             <ArrowUpIcon

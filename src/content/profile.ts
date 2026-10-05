@@ -1,10 +1,12 @@
 import type {
   ExperienceEntry,
+  Game,
   Principle,
+  RigPart,
   Service,
-  StackGroup,
   Testimonial,
 } from '@/types/content'
+import type { TechName } from '@/lib/tech-icons'
 
 export const services: Service[] = [
   {
@@ -145,15 +147,58 @@ export const principles: Principle[] = [
   },
 ]
 
-export const stack: StackGroup[] = [
-  {
-    label: 'Frontend',
-    items: ['Vue 3', 'Nuxt', 'React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Motion'],
-  },
-  { label: 'Mobile', items: ['React Native', 'Expo', 'Reanimated', 'Skia', 'Native modules'] },
-  { label: 'Desktop', items: ['Tauri', 'Rust', 'Electron', 'Auto-update', 'Code signing'] },
-  { label: 'Backend', items: ['Node.js', 'tRPC', 'GraphQL', 'PostgreSQL', 'Redis', 'Supabase'] },
-  { label: 'Craft', items: ['Design systems', 'Motion design', 'three.js', 'Accessibility', 'Figma'] },
+/** Toolbox chips on the About page, in display order — each needs a mark in `src/lib/tech-icons.ts`. */
+export const toolbox: TechName[] = [
+  'Vue 3',
+  'Nuxt',
+  'React',
+  'Next.js',
+  'TypeScript',
+  'Tailwind CSS',
+  'React Native',
+  'Expo',
+  'Tauri',
+  'Rust',
+  'Electron',
+  'Node.js',
+  'tRPC',
+  'GraphQL',
+  'PostgreSQL',
+  'Redis',
+  'Supabase',
+  'three.js',
+  'Figma',
+]
+
+/** Tools and practices without a brand mark — one line under the chips. */
+export const toolboxExtras = [
+  'Motion',
+  'Reanimated',
+  'Skia',
+  'native modules',
+  'auto-update & code signing',
+  'design systems',
+  'accessibility',
+]
+
+/** PLACEHOLDER — swap in your real library and hours (Steam → Library shows them per game). */
+export const games: Game[] = [
+  { title: 'Counter-Strike 2', genre: 'Tactical shooter', hours: 1240, color: 'ember', sample: true },
+  { title: 'Cyberpunk 2077', genre: 'Open-world RPG', hours: 410, color: 'volt', current: true, sample: true },
+  { title: 'Elden Ring', genre: 'Action RPG', hours: 860, color: 'cobalt', sample: true },
+  { title: 'Ghost Recon Breakpoint', genre: 'Open-world Tactical Shooter', hours: 340, color: 'mint', sample: true },
+  { title: 'GTA V', genre: 'Racing', hours: 320, color: 'blush', sample: true },
+  { title: 'Witcher 3', genre: 'RPG', hours: 450, color: 'ember', sample: true },
+]
+
+/** PLACEHOLDER — your actual build. */
+export const rig: RigPart[] = [
+  { label: 'CPU', value: 'AMD Ryzen 7800X3D', sample: true },
+  { label: 'GPU', value: 'NVIDIA GeForce RTX 3080', sample: true },
+  { label: 'Memory', value: '32 GB DDR5-6000', sample: true },
+  { label: 'Storage', value: '2 TB NVMe Gen4', sample: true },
+  { label: 'Display', value: '27″ 1440p OLED · 240 Hz', sample: true },
+  { label: 'Inputs', value: 'Wooting 60HE · G Pro X Superlight 2', sample: true },
 ]
 
 export const marqueeStack = [

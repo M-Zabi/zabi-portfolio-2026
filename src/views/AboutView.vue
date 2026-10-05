@@ -1,5 +1,8 @@
 <script setup lang="ts">
 
+import GameLeaderboard from '@/components/about/GameLeaderboard.vue'
+import RigPanel from '@/components/about/RigPanel.vue'
+import TechToolbox from '@/components/about/TechToolbox.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeading from '@/components/common/SectionHeading.vue'
 import AppMark from '@/components/layout/AppMark.vue'
@@ -7,7 +10,7 @@ import FadeIn from '@/components/motion/FadeIn.vue'
 import { usePageMeta } from '@/composables/usePageMeta'
 import { pages } from '@/config/seo'
 import { site, yearsOfExperience } from '@/config/site'
-import { experience, principles, stack } from '@/content/profile'
+import { experience, principles } from '@/content/profile'
 import { padIndex } from '@/lib/utils'
 
 usePageMeta(pages.about)
@@ -47,6 +50,10 @@ usePageMeta(pages.about)
           I work best as an embedded senior engineer, or as the person who takes a product from prototype to launch:
           the API, the motion system and the release pipeline, shipped by one pair of hands.
         </FadeIn>
+        <div class="pt-4">
+          <FadeIn as="h2" :y="10" :delay="0.2" class="text-label text-muted-foreground">(Toolbox)</FadeIn>
+          <TechToolbox class="mt-4" />
+        </div>
       </div>
     </section>
 
@@ -84,15 +91,19 @@ usePageMeta(pages.about)
       </ol>
     </section>
 
-    <section class="section-y container-page border-t border-border" aria-labelledby="toolbox-title">
-      <SectionHeading index="03" label="Toolbox" title-id="toolbox-title" :title="'The *toolbox.*'" />
-      <div class="mt-14 grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-3 lg:grid-cols-5">
-        <FadeIn v-for="(group, index) in stack" :key="group.label" :delay="index * 0.06">
-          <h3 class="text-label text-muted-foreground">{{ group.label }}</h3>
-          <ul class="mt-4 space-y-2">
-            <li v-for="item in group.items" :key="item" class="font-medium">{{ item }}</li>
-          </ul>
+    <section id="off-the-clock" class="section-y container-page border-t border-border" aria-labelledby="games-title">
+      <SectionHeading
+        index="03"
+        label="Off the clock"
+        title-id="games-title"
+        :title="'Player *one.*'"
+        description="When the editor closes, the PC stays on. Games taught me how low latency, steady frame pacing and a menu that respects your time actually feel — I’ve been chasing that feeling in software ever since."
+      />
+      <div class="mt-14 grid gap-10 lg:grid-cols-12 lg:gap-8">
+        <FadeIn class="lg:col-span-5">
+          <RigPanel />
         </FadeIn>
+        <GameLeaderboard class="lg:col-span-7 lg:pl-4" />
       </div>
     </section>
   </div>

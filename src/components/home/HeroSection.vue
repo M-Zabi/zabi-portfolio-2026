@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ArrowDownIcon, GlobeIcon } from '@lucide/vue'
+import { ArrowDownIcon, ArrowRightIcon, Gamepad2Icon, GlobeIcon } from '@lucide/vue'
 import { useEventListener, useMediaQuery } from '@vueuse/core'
 import { motion, useReducedMotion } from 'motion-v'
 import { ref } from 'vue'
 
 import ArrowLink from '@/components/common/ArrowLink.vue'
+import IndiaFlag from '@/components/common/IndiaFlag.vue'
 import StatusDot from '@/components/common/StatusDot.vue'
 import FadeIn from '@/components/motion/FadeIn.vue'
 import RevealText from '@/components/motion/RevealText.vue'
@@ -53,10 +54,28 @@ function scrollToContent() {
   >
     <div class="container-page flex flex-1 flex-col justify-between gap-14 pt-8 pb-8 lg:pt-12">
       <div>
-        <FadeIn as="p" :y="10" class="text-label flex items-center gap-3 text-muted-foreground">
-          <StatusDot />
-          {{ site.role }}
-        </FadeIn>
+        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
+          <FadeIn as="p" :y="10" class="text-label flex items-center gap-3 text-muted-foreground">
+            <StatusDot />
+            {{ site.role }}
+          </FadeIn>
+          <FadeIn :y="10" :delay="0.1">
+            <RouterLink
+              to="/about#off-the-clock"
+              class="group/play text-label -my-3 inline-flex min-h-11 items-center gap-2 text-muted-foreground transition-colors duration-300 hover:text-foreground"
+            >
+              <Gamepad2Icon
+                class="size-4 transition-transform duration-500 ease-out-expo group-hover/play:-rotate-12"
+                aria-hidden="true"
+              />
+              Off the clock: PC gamer
+              <ArrowRightIcon
+                class="size-3 -translate-x-1 opacity-0 transition duration-300 ease-out-quint group-hover/play:translate-x-0 group-hover/play:opacity-100"
+                aria-hidden="true"
+              />
+            </RouterLink>
+          </FadeIn>
+        </div>
 
         <h1 id="hero-title" class="mt-6 font-display text-display-xl tracking-[-0.05em] [font-stretch:104%]">
           <RevealText text="Software" trigger="ready" class="block" />
@@ -113,7 +132,8 @@ function scrollToContent() {
             </p>
           </div>
           <p class="mt-5 text-lead text-balance">
-            Web platforms, React Native apps and desktop tools — built in {{ site.home.city }}, {{ site.home.country }},
+            Web platforms, React Native apps and desktop tools — built in {{ site.home.city }},
+            <span class="whitespace-nowrap">{{ site.home.country }} <IndiaFlag class="inline-block w-[1.05em] align-baseline" /></span>,
             for clarity, speed and feel.
           </p>
         </FadeIn>

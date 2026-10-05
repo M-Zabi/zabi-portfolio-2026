@@ -17,7 +17,7 @@ export const router = createRouter({
     // Same page (filters in the query string, hash links): stay put unless a hash asks to move.
     if (to.path === from.path) return to.hash ? { el: to.hash, top: 96, behavior: 'smooth' } : false
     // Runs while the curtain covers the page, so the jump is never visible.
-    return savedPosition ?? { top: 0 }
+    return savedPosition ?? (to.hash ? { el: to.hash, top: 96 } : { top: 0 })
   },
 })
 

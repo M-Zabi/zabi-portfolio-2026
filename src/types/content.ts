@@ -70,12 +70,26 @@ export interface ExperienceEntry {
   sample?: boolean
 }
 
-export interface StackGroup {
-  label: string
-  items: string[]
-}
-
 export interface Principle {
   title: string
   body: string
+}
+
+export interface Game {
+  title: string
+  genre: string
+  /** Lifetime hours — orders the leaderboard and sets each bar's length. */
+  hours: number
+  color: BrandColor
+  /** What's in the drive right now — flagged on the leaderboard. */
+  current?: boolean
+  /** Illustrative sample content. The production build refuses to ship records marked this way. */
+  sample?: boolean
+}
+
+export interface RigPart {
+  label: string
+  value: string
+  /** Illustrative sample content. The production build refuses to ship records marked this way. */
+  sample?: boolean
 }
