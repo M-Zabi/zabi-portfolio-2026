@@ -43,3 +43,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Plaintext for password-locked pages (sealed copies live in src/content/vault/sealed)
+/vault/*.json

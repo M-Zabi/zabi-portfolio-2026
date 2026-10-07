@@ -16,11 +16,12 @@ import {
 import { type Component, computed } from 'vue'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { site } from '@/config/site'
+import { useHomeBase } from '@/composables/useHomeBase'
 import { describeWeather, type Sky } from '@/lib/weather'
 import { useWeatherQuery } from '@/queries/weather'
 
 /** Mini weather report for the home city: temperature, sky and today's high / low. */
+const home = useHomeBase()
 const { data: weather, isError } = useWeatherQuery()
 
 const icons: Record<Sky, [day: Component, night: Component]> = {
@@ -46,7 +47,7 @@ const degrees = (value: number) => `${Math.round(value)}°`
 
 <template>
   <div>
-    <p class="text-label opacity-60">Weather · {{ site.home.city }}</p>
+    <p class="text-label opacity-60">Weather · {{ home.city }}</p>
 
     <div v-if="weather && report" class="mt-3">
       <p class="flex items-center gap-2.5 font-display text-2xl font-semibold">

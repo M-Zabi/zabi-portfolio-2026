@@ -18,8 +18,11 @@ import FadeIn from '@/components/motion/FadeIn.vue'
 import RevealText from '@/components/motion/RevealText.vue'
 import RollingText from '@/components/motion/RollingText.vue'
 import { scrollToTop } from '@/composables/useLenis'
+import { useHomeBase } from '@/composables/useHomeBase'
 import { site } from '@/config/site'
 import { spring } from '@/lib/motion'
+
+const home = useHomeBase()
 
 const { copy, copied, isSupported } = useClipboard({ copiedDuring: 2000 })
 const year = new Date().getFullYear()
@@ -121,7 +124,7 @@ async function copyEmail() {
           <p class="text-label opacity-60">Based in</p>
           <p class="mt-3 flex items-start gap-2.5 text-sm font-medium">
             <IndiaFlag class="mt-0.5 w-6 shrink-0" />
-            <span>{{ site.home.city }}, {{ site.home.region }}, {{ site.home.country }}</span>
+            <span>{{ home.city }}, {{ home.region }}, {{ home.country }}</span>
           </p>
         </FadeIn>
 

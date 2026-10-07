@@ -13,7 +13,10 @@ import { usePageMeta } from '@/composables/usePageMeta'
 import { pages } from '@/config/seo'
 import { testimonials } from '@/content/profile'
 
-usePageMeta(pages.home)
+/** A private page can render the landing page with its own headline (and its own meta). */
+const props = defineProps<{ hero?: { lines: [string, string]; words: string[] }; embedded?: boolean }>()
+
+if (!props.embedded) usePageMeta(pages.home)
 
 const blast = ref(false)
 </script>
@@ -21,7 +24,7 @@ const blast = ref(false)
 <template>
   <div class="relative">
     <HeroScene :blast="blast" />
-    <HeroSection v-model:blast="blast" />
+    <HeroSection v-model:blast="blast" :lines="hero?.lines" :words="hero?.words" />
     <ManifestoSection />
     <ServicesSection />
     <CapabilitiesSection />

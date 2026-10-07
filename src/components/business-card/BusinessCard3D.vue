@@ -3,6 +3,7 @@ import { motion, useMotionTemplate, useMotionValue, useReducedMotion, useSpring,
 import { computed, ref, useTemplateRef, watch } from 'vue'
 
 import AppMark from '@/components/layout/AppMark.vue'
+import { useHomeBase } from '@/composables/useHomeBase'
 import { site } from '@/config/site'
 
 /**
@@ -52,6 +53,7 @@ function onLeave() {
 }
 
 const host = computed(() => site.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))
+const home = useHomeBase()
 
 /** Deterministic dot matrix — decorative, seeded from the email so it is unique per owner. */
 const dots = computed(() => {
@@ -128,7 +130,7 @@ const dots = computed(() => {
                 {{ site.email }}
               </span>
               <span class="font-mono text-[2.3cqw] tracking-[0.06em] uppercase opacity-75">{{ host }}</span>
-              <span class="font-mono text-[2.3cqw] tracking-[0.06em] uppercase opacity-75">{{ site.location }}</span>
+              <span class="font-mono text-[2.3cqw] tracking-[0.06em] uppercase opacity-75">{{ home.location }}</span>
             </span>
             <span class="grid shrink-0 grid-cols-7 gap-[0.8cqw]">
               <span

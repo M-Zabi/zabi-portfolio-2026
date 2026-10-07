@@ -19,6 +19,7 @@
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "assets": "node scripts/generate-assets.ts",
+    "vault:seal": "node scripts/seal-vault.ts",
     "ui:add": "npx shadcn-vue@latest add"
   },
   "dependencies": {

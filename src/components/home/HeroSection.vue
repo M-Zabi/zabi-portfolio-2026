@@ -13,6 +13,7 @@ import RotatingWord from '@/components/motion/RotatingWord.vue'
 import ScrambleText from '@/components/motion/ScrambleText.vue'
 import { getLenis } from '@/composables/useLenis'
 import { usePageReady } from '@/composables/usePageReady'
+import { useHomeBase } from '@/composables/useHomeBase'
 import { site, yearsOfExperience } from '@/config/site'
 import { oneLiners } from '@/content/profile'
 import { ease } from '@/lib/motion'
@@ -22,13 +23,19 @@ import HeroWidgets from './widgets/HeroWidgets.vue'
 /** Press-and-hold anywhere on the hero (outside links and the widgets) scatters the 3D symbol. */
 const blast = defineModel<boolean>('blast', { default: false })
 
+/** Private pages remix the headline: two fixed lines and the rotating third. */
+const props = withDefaults(defineProps<{ lines?: [string, string]; words?: string[] }>(), {
+  lines: () => ['Software', 'that feels'],
+  words: () => ['alive', 'effortless', 'native', 'inevitable', 'fast'],
+})
+
 const pageReady = usePageReady()
+const home = useHomeBase()
 const reducedMotion = useReducedMotion()
 const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
 const rotating = ref(false)
 const holdLine = ref(false)
 
-const words = ['alive', 'effortless', 'native', 'inevitable', 'fast']
 
 function onPointerDown(event: PointerEvent) {
   if (event.button !== 0 || reducedMotion.value) return
@@ -89,8 +96,8 @@ function scrollToContent() {
         </div>
 
         <h1 id="hero-title" class="mt-6 font-display text-display-xl tracking-[-0.05em] [font-stretch:104%]">
-          <RevealText text="Software" trigger="ready" class="block" />
-          <RevealText text="that feels" trigger="ready" :delay="0.08" class="block" @revealed="rotating = true" />
+          <RevealText :text="props.lines[0]" trigger="ready" class="block" />
+          <RevealText :text="props.lines[1]" trigger="ready" :delay="0.08" class="block" @revealed="rotating = true" />
           <span class="reveal-mask block pr-[0.1em]">
             <motion.span
               class="block text-primary italic"
@@ -98,7 +105,7 @@ function scrollToContent() {
               :animate="{ y: pageReady ? '0%' : '112%' }"
               :transition="{ duration: 1, delay: 0.2, ease: ease.outQuint }"
             >
-              <RotatingWord :words="words" :active="rotating" />
+              <RotatingWord :words="props.words" :active="rotating" />
             </motion.span>
           </span>
         </h1>
@@ -139,8 +146,8 @@ function scrollToContent() {
             </p>
           </div>
           <p class="mt-5 text-lead text-balance">
-            Web platforms, React Native apps and desktop tools — built in {{ site.home.city }},
-            <span class="whitespace-nowrap">{{ site.home.country }} <IndiaFlag class="inline-block w-[1.05em] align-baseline" /></span>,
+            Web platforms, React Native apps and desktop tools — built in {{ home.city }},
+            <span class="whitespace-nowrap">{{ home.country }} <IndiaFlag class="inline-block w-[1.05em] align-baseline" /></span>,
             for clarity, speed and feel.
           </p>
         </FadeIn>

@@ -49,7 +49,8 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
-    component: () => import('@/views/NotFoundView.vue'),
+    // Checks for a password-locked page first (see LostView), then shows the 404.
+    component: () => import('@/views/LostView.vue'),
     meta: { title: 'Lost' },
   },
 ]

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 
 import BentoTile from '@/components/home/bento/BentoTile.vue'
 import { Skeleton } from '@/components/ui/skeleton'
-import { site } from '@/config/site'
+import { useHomeBase } from '@/composables/useHomeBase'
 import { describeWeather } from '@/lib/weather'
 import { useWeatherQuery } from '@/queries/weather'
 
@@ -12,6 +12,7 @@ import WeatherGlyph from './WeatherGlyph.vue'
 /** Hero tile: live conditions in the home city (shares the footer's cached forecast). */
 defineProps<{ delay?: number }>()
 
+const home = useHomeBase()
 const { data: weather, isError } = useWeatherQuery()
 const report = computed(() => (weather.value ? describeWeather(weather.value.code) : null))
 const degrees = (value: number) => `${Math.round(value)}°`
@@ -20,7 +21,7 @@ const degrees = (value: number) => `${Math.round(value)}°`
 <template>
   <BentoTile :delay="delay" content-class="justify-between rounded-2xl p-3 sm:p-3 xl:p-4">
     <div class="flex items-start justify-between gap-2">
-      <p class="text-label truncate pt-0.5 text-muted-foreground">{{ site.home.city }}</p>
+      <p class="text-label truncate pt-0.5 text-muted-foreground">{{ home.city }}</p>
       <WeatherGlyph
         v-if="weather && report"
         :sky="report.sky"
