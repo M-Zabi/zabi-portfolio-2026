@@ -11,7 +11,6 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { chromium } from '@playwright/test'
-import { loadEnv } from 'vite'
 
 import { site } from '../src/config/site.ts'
 import { markPieces, markViewBox } from '../src/lib/mark.ts'

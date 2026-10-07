@@ -1,3 +1,4 @@
+import type { Post } from '@/types/blog'
 import type { Project } from '@/types/content'
 
 import { site } from './site'
@@ -32,12 +33,21 @@ export const pages = {
     description: `About ${site.name} — ${site.role} based in ${site.home.city}, ${site.home.country}.`,
     type: 'profile',
   },
+  blog: {
+    title: 'Blog',
+    description:
+      'Field notes on AI editors, agents, local LLMs, model costs and design tools — researched, referenced and written by a working engineer.',
+  },
   contact: { title: 'Contact', description: `Start a project with ${site.name}. ${site.replyTime}.` },
   notFound: { title: 'Not found', description: 'This page doesn’t exist — it may have moved.' },
 } satisfies Record<string, PageMeta>
 
 export function projectPage(project: Project): PageMeta {
   return { title: project.title, description: project.summary, type: 'article' }
+}
+
+export function postPage(post: Post): PageMeta & { publishedAt: string; updatedAt?: string } {
+  return { title: post.title, description: post.excerpt, type: 'article', publishedAt: post.publishedAt, updatedAt: post.updatedAt }
 }
 
 /** Social preview image (1200 × 630), regenerated with `npm run assets`. */

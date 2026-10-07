@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 
+import { posts } from '../src/content/blog'
 import { projects } from '../src/content/projects'
 
 /** Collects anything the browser reports as broken: exceptions, console errors, CSP violations. */
@@ -18,7 +19,17 @@ async function waitForSite(page: Page) {
 }
 
 const firstProject = projects[0]
-const routes = ['/', '/work', ...(firstProject ? [`/work/${firstProject.slug}`] : []), '/about', '/contact']
+const firstPost = posts[0]
+const routes = [
+  '/',
+  '/work',
+  ...(firstProject ? [`/work/${firstProject.slug}`] : []),
+  '/about',
+  '/blog',
+  ...(firstPost ? [`/blog/${firstPost.slug}`] : []),
+  '/contact',
+  '/contact?intent=resume',
+]
 
 test.describe('every route', () => {
   for (const path of routes) {
@@ -59,18 +70,49 @@ test('menu navigation runs through the route curtain', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-test('the contact form validates before sending', async ({ page }) => {
+test('the contact assistant asks one question at a time and validates each answer', async ({ page }) => {
   await page.goto('/contact')
   await waitForSite(page)
 
-  await page.getByRole('button', { name: /send message/i }).click()
-  await expect(page.getByText('Tell me what to call you.')).toBeVisible()
-  await expect(page.getByLabel('Your name')).toBeFocused()
+  const name = page.getByLabel(/what should i call you/i)
+  await expect(name).toBeFocused({ timeout: 10_000 })
+  await name.press('Enter')
+  await expect(page.getByRole('alert').filter({ hasText: 'Tell me what to call you.' })).toBeVisible()
 
-  await page.getByLabel('Your name').fill('Ada Lovelace')
-  await page.getByLabel('Email').fill('not-an-email')
-  await page.getByLabel('Email').blur()
-  await expect(page.getByText('That email doesn’t look right.')).toBeVisible()
+  await name.fill('Ada Lovelace')
+  await name.press('Enter')
+  const email = page.getByLabel(/where should zabi reply/i)
+  await expect(email).toBeFocused({ timeout: 10_000 })
+  await email.fill('not-an-email')
+  await email.press('Enter')
+  await expect(page.getByRole('alert').filter({ hasText: 'That email doesn’t look right.' })).toBeVisible()
+
+  // Going back removes the answer and asks again.
+  await page.getByRole('button', { name: /^back$/i }).click()
+  await expect(page.getByLabel(/what should i call you/i)).toBeFocused({ timeout: 10_000 })
+})
+
+test('an article supports hearts, comments and the AI summary', async ({ page }) => {
+  test.skip(!firstPost, 'no posts')
+  const errors = watchForErrors(page)
+  await page.goto(`/blog/${firstPost!.slug}`)
+  await waitForSite(page)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(firstPost!.title.split(' ')[0]!)
+
+  await page.getByRole('button', { name: /summarize with ai/i }).click()
+  const summary = page.getByRole('region', { name: 'AI summary' })
+  await expect(summary).toBeVisible()
+  await expect(summary.getByText(/key points/i)).toBeVisible({ timeout: 15_000 })
+
+  await page.getByRole('button', { name: /be the first to comment|read \d+ comment/i }).click()
+  const drawer = page.getByRole('dialog')
+  await expect(drawer).toBeVisible()
+  await drawer.getByLabel('Name').fill('Ada')
+  await drawer.getByLabel('Comment').fill('The KV cache arithmetic finally clicked.')
+  await drawer.getByRole('button', { name: /post comment/i }).click()
+  await expect(drawer.getByText('The KV cache arithmetic finally clicked.')).toBeVisible()
+  await expect(drawer.getByRole('heading', { name: '1 comment' })).toBeVisible()
+  expect(errors).toEqual([])
 })
 
 test('the theme toggle switches and persists', async ({ page }) => {

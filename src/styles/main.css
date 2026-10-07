@@ -97,6 +97,12 @@
   --color-ink: var(--ink);
   --color-paper: var(--paper);
 
+  /* Data viz — categorical slots in fixed order (see --chart-* below). */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -145,6 +151,28 @@
   --ink: oklch(0.18 0.012 45);
   --paper: oklch(0.975 0.007 75);
 
+  /*
+   * Chart slots, derived from the brand hues and validated for colour-blind separation
+   * (OKLab ΔE ≥ 8 adjacent under protan/deutan) and lightness on the card surface.
+   * Order is fixed: cobalt, ember, teal, olive. Slot 4 is below 3:1 on light cards, so
+   * every chart that uses it ships direct labels and a table view.
+   */
+  --chart-1: #245fd4;
+  --chart-2: #ee5e23;
+  --chart-3: #009d82;
+  --chart-4: #a59c00;
+
+  /* Code blocks sit on ink in both themes. */
+  --code-bg: oklch(0.19 0.012 45);
+  --code-fg: oklch(0.93 0.01 75);
+  --code-muted: oklch(0.66 0.015 60);
+  --code-keyword: oklch(0.76 0.15 40);
+  --code-string: oklch(0.84 0.11 165);
+  --code-number: oklch(0.88 0.14 105);
+  --code-function: oklch(0.78 0.12 262);
+  --code-type: oklch(0.82 0.08 12);
+  --code-property: oklch(0.86 0.06 240);
+
   /* Layout rhythm */
   --gutter: clamp(1rem, 0.4rem + 2.6vw, 2.5rem);
   --space-section: clamp(5rem, 2.5rem + 9vw, 11rem);
@@ -179,6 +207,13 @@
   --mint: oklch(0.82 0.12 168);
   --blush: oklch(0.8 0.09 12);
   --ink: oklch(0.13 0.008 45);
+
+  --chart-1: #3a74e3;
+  --chart-2: #e56636;
+  --chart-3: #039580;
+  --chart-4: #b19100;
+
+  --code-bg: oklch(0.13 0.008 45);
 }
 
 /* ───────────────────────────── Base ───────────────────────────── */

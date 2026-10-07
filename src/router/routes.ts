@@ -28,6 +28,19 @@ export const routes: RouteRecordRaw[] = [
     meta: { title: 'About' },
   },
   {
+    path: '/blog',
+    name: 'blog',
+    component: () => import('@/views/BlogView.vue'),
+    meta: { title: 'Blog' },
+  },
+  {
+    path: '/blog/:slug',
+    name: 'post',
+    component: () => import('@/views/PostView.vue'),
+    props: true,
+    meta: { title: 'Article' },
+  },
+  {
     path: '/contact',
     name: 'contact',
     component: () => import('@/views/ContactView.vue'),

@@ -52,6 +52,15 @@ export const site = {
     /** TODO */
     label: 'Booking projects for Q1 2027',
   },
+  /**
+   * TODO: put your résumé at `public/resume.pdf` (the build warns while it is missing). Visitors
+   * reach it through the assistant on /contact?intent=resume.
+   */
+  resume: {
+    href: '/resume.pdf',
+    /** File name the browser saves it as. */
+    fileName: 'Zabi-Resume.pdf',
+  },
   /** TODO: only promise what you can keep. */
   replyTime: 'Replies within one business day',
   /** TODO: shown in the workflow tile. */
@@ -62,6 +71,7 @@ export const site = {
     { label: 'Home', to: '/' },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
+    { label: 'Blog', to: '/blog' },
     { label: 'Contact', to: '/contact' },
   ] satisfies NavItem[],
   /** TODO: real profile URLs (bare domains like https://github.com/ fail the production build). */

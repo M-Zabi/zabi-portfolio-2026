@@ -8,6 +8,8 @@ const valid = {
   email: 'ada@example.com',
   company: '',
   projectType: 'Mobile app',
+  stage: 'Designs ready',
+  timeline: '1–3 months',
   budget: '$25k – 50k',
   message: 'We need an offline-first field app for our inspection crews.',
   website: '',

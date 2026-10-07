@@ -1,5 +1,10 @@
 import { site } from '@/config/site'
-import { type ContactPayload, contactSchema } from '@/lib/validators/contact'
+import {
+  type ContactPayload,
+  contactSchema,
+  type ResumeRequestPayload,
+  resumeRequestSchema,
+} from '@/lib/validators/contact'
 
 export type ContactChannel = 'api' | 'mailto'
 
@@ -18,6 +23,8 @@ export function buildMailto(payload: ContactPayload): string {
   const body = [
     payload.message,
     '',
+    `Stage: ${payload.stage}`,
+    `Timeline: ${payload.timeline}`,
     `Budget: ${payload.budget}`,
     payload.company ? `Company: ${payload.company}` : null,
     `Reply to: ${payload.email}`,
@@ -27,12 +34,29 @@ export function buildMailto(payload: ContactPayload): string {
   return `mailto:${site.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }
 
+async function post(endpoint: string, body: Record<string, unknown>) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    throw new ContactRequestError(
+      response.status >= 500
+        ? 'The message service is having a moment. Please try again shortly.'
+        : 'That didn’t go through. Please check your answers and try again.',
+      response.status,
+    )
+  }
+}
+
 /**
- * Sends an enquiry.
+ * Sends a project brief.
  *
  * With `VITE_CONTACT_ENDPOINT` set (Formspree, a serverless function, your API…) the
- * payload is POSTed as JSON. Without one, the visitor's mail client opens pre-filled —
- * a message is never silently dropped.
+ * payload is POSTed as JSON with `intent: "project"`. Without one, the visitor's mail client
+ * opens pre-filled — a message is never silently dropped.
  */
 export async function submitContact(input: ContactPayload): Promise<ContactChannel> {
   const payload = contactSchema.parse(input)
@@ -47,19 +71,45 @@ export async function submitContact(input: ContactPayload): Promise<ContactChann
   }
 
   const { website: _honeypot, ...body } = payload
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(body),
-  })
-
-  if (!response.ok) {
-    throw new ContactRequestError(
-      response.status >= 500
-        ? 'The message service is having a moment. Please try again shortly.'
-        : 'That didn’t go through. Please check the form and try again.',
-      response.status,
-    )
-  }
+  await post(endpoint, { intent: 'project', ...body })
   return 'api'
+}
+
+/**
+ * Records who asked for the résumé, then hands it over. The conversation itself is the gate:
+ * with an endpoint the request is logged (and a failure is reported); without one the
+ * download simply proceeds — a visitor is never blocked by missing infrastructure.
+ */
+export async function requestResume(input: ResumeRequestPayload): Promise<'logged' | 'unlogged'> {
+  const payload = resumeRequestSchema.parse(input)
+  if (payload.website) return 'unlogged'
+
+  const endpoint = import.meta.env.VITE_CONTACT_ENDPOINT
+  if (!endpoint) return 'unlogged'
+
+  const { website: _honeypot, ...body } = payload
+  await post(endpoint, { intent: 'resume', ...body })
+  return 'logged'
+}
+
+/** Starts the download in the visitor's browser. */
+export function downloadResume() {
+  const link = document.createElement('a')
+  link.href = site.resume.href
+  link.download = site.resume.fileName
+  link.rel = 'noopener'
+  document.body.append(link)
+  link.click()
+  link.remove()
+}
+
+/** True when a résumé file is actually deployed (a missing file would download a 404 page). */
+export async function resumeAvailable(): Promise<boolean> {
+  try {
+    const response = await fetch(site.resume.href, { method: 'HEAD', cache: 'no-store' })
+    const type = response.headers.get('content-type') ?? ''
+    return response.ok && !type.includes('text/html')
+  } catch {
+    return false
+  }
 }

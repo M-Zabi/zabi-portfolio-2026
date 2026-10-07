@@ -8,7 +8,7 @@
     document.documentElement.classList.toggle('dark', dark)
     var meta = document.querySelector('meta[name="theme-color"]')
     if (meta) meta.setAttribute('content', dark ? '#191512' : '#f7f4ef')
-  } catch (error) {
+  } catch {
     /* Storage blocked — the app applies the system theme on boot. */
   }
 })()

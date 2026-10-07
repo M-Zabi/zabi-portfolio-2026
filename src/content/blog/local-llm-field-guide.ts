@@ -1,0 +1,195 @@
+import type { Post } from '@/types/blog'
+
+export const post: Post = {
+  slug: 'local-llm-field-guide',
+  title: 'Run a local LLM that is actually useful',
+  dek: 'VRAM arithmetic, quantisation formats, the KV cache nobody budgets for, and a setup you can wire into your editor tonight.',
+  excerpt:
+    'A practical 2026 guide to running language models on your own hardware: how to size memory, which runtime to pick (Ollama, llama.cpp, LM Studio, vLLM), and the settings that matter.',
+  category: 'local-ai',
+  tags: ['Ollama', 'llama.cpp', 'vLLM', 'GGUF', 'Quantisation', 'KV cache'],
+  color: 'mint',
+  cover: 'chip',
+  publishedAt: '2026-09-04',
+  summary: {
+    tldr: 'Local models are now good enough for private code assistance, summarisation and offline tools — if you size memory properly. Budget for weights (parameters × bits ÷ 8), the KV cache (which grows linearly with context) and runtime overhead; then pick Ollama for convenience, llama.cpp for control, or vLLM for multi-user throughput.',
+    points: [
+      'Weights: an 8B model at Q4_K_M is ~4.9 GB; the same model at FP16 is ~16 GB.',
+      'KV cache: Llama-3.1-8B stores 128 KiB per token at FP16 — 1 GB at 8k context, 17 GB at 128k. Quantising the cache to q8_0 halves it.',
+      'Ollama’s documented default context is 4,096 tokens; raise it deliberately with OLLAMA_CONTEXT_LENGTH or num_ctx.',
+      'Mixture-of-experts models like gpt-oss-20b (3.6B active of 21B) run well on 16 GB because only a fraction of weights are used per token.',
+      'Bind servers to localhost — Ollama and llama-server have no authentication by default.',
+    ],
+  },
+  body: [
+    {
+      type: 'lead',
+      text: 'A local model will not beat a frontier API on the hardest problems. It does not need to. For private code search, summarising documents you cannot upload, offline tooling and high-volume classification, a well-sized local model is fast, free at the margin and entirely yours.',
+    },
+    {
+      type: 'p',
+      text: 'Most failed local setups fail on memory, not models: a context window that silently truncates, a KV cache that spills into system RAM and drops throughput tenfold, or a quantisation that is too aggressive for the task. This guide starts with the arithmetic, then the runtimes, then a working setup.',
+    },
+    { type: 'h2', id: 'memory', text: 'The memory budget: three line items' },
+    {
+      type: 'p',
+      text: 'Everything a model needs at inference time must fit in fast memory — VRAM on a discrete GPU, unified memory on Apple Silicon. Spill to system RAM over PCIe and generation speed collapses. The budget has three parts.',
+    },
+    { type: 'h3', text: '1. Weights' },
+    {
+      type: 'p',
+      text: 'Memory for weights is roughly *parameters × bits per weight ÷ 8*. An 8-billion-parameter model at FP16 (16 bits) needs about 16 GB. Quantised to GGUF **Q4_K_M** — about 4.9 effective bits per weight once scales and mixed-precision tensors are counted — it needs about 4.9 GB.',
+    },
+    { type: 'h3', text: '2. The KV cache' },
+    {
+      type: 'p',
+      text: 'During generation the model caches a key and a value vector for every token, in every layer, for every key-value head. That cache grows linearly with context length and is the line item people forget. For one sequence:',
+    },
+    {
+      type: 'code',
+      lang: 'text',
+      code: 'KV bytes = 2 (K and V) × layers × kv_heads × head_dim × bytes_per_element × tokens\n\nLlama-3.1-8B: 2 × 32 × 8 × 128 × 2 bytes (FP16) = 131,072 bytes = 128 KiB per token\n\n  8,192 tokens →  1.07 GB\n 32,768 tokens →  4.29 GB\n131,072 tokens → 17.18 GB',
+      caption: 'The 8 in `kv_heads` is grouped-query attention at work: 32 query heads share 8 key-value heads, which cuts the cache 4× versus full multi-head attention[^4][^12].',
+    },
+    {
+      type: 'p',
+      text: 'At 128k context the *cache* is three and a half times the size of the quantised *weights*. Two levers shrink it: a shorter context (most tasks do not need 128k) and a quantised cache. llama.cpp and Ollama both support `q8_0` and `q4_0` caches; `q8_0` roughly halves memory with little measurable quality loss, `q4_0` quarters it at a noticeable cost on long-range recall[^1][^2].',
+    },
+    { type: 'h3', text: '3. Runtime overhead' },
+    {
+      type: 'p',
+      text: 'Compute buffers, the CUDA or Metal context, and the scratch space for attention add roughly 0.5–1 GB. Flash attention reduces the attention scratch space substantially by never materialising the full attention matrix[^5].',
+    },
+    {
+      type: 'figure',
+      figure: 'vram-budget',
+      caption: 'Llama-3.1-8B at Q4_K_M: weights stay fixed while the KV cache scales with context. At 128k tokens an FP16 cache needs a 24 GB card; a q8_0 cache brings it under 16 GB.',
+      alt: 'Stacked bars of VRAM use for an 8B model: 6.8 GB at 8k context, 10 GB at 32k, 22.9 GB at 128k with an FP16 cache and 14.3 GB at 128k with a q8_0 cache, against 8, 12, 16 and 24 GB card lines.',
+    },
+    { type: 'h2', id: 'quantisation', text: 'Quantisation formats, briefly' },
+    {
+      type: 'table',
+      caption: 'Which format goes with which runtime.',
+      head: ['Format', 'Where it runs', 'Notes'],
+      rows: [
+        ['GGUF k-quants (Q4_K_M, Q5_K_M, Q6_K, Q8_0)', 'llama.cpp, Ollama, LM Studio', 'Block-wise quantisation with per-block scales; Q4_K_M is the usual sweet spot, Q6_K when quality matters.'],
+        ['GGUF i-quants (IQ2–IQ4)', 'llama.cpp', 'Importance-matrix quants for squeezing large models into small memory; slower on some backends.'],
+        ['AWQ', 'vLLM and other GPU servers', 'Activation-aware weight quantisation: protects the ~1% of salient weights[^6].'],
+        ['GPTQ', 'vLLM and other GPU servers', 'One-shot post-training quantisation using approximate second-order information[^7].'],
+        ['FP8 / MXFP4', 'Recent NVIDIA and AMD GPUs', 'Hardware-native low precision; gpt-oss ships its MoE weights in MXFP4[^8].'],
+      ],
+    },
+    {
+      type: 'callout',
+      tone: 'tip',
+      title: 'Prefer more parameters at lower precision',
+      text: 'Within a memory budget, a larger model at Q4 usually beats a smaller model at Q8 on reasoning and code. Below roughly 3.5 bits per weight the curve turns: drop to a smaller model instead.',
+    },
+    { type: 'h2', id: 'moe', text: 'Mixture-of-experts changes the maths' },
+    {
+      type: 'p',
+      text: 'In a mixture-of-experts model only a few expert blocks run for each token. OpenAI’s gpt-oss-20b has about 21B total parameters but 3.6B active per token, and is designed to run within 16 GB of memory; gpt-oss-120b has 117B total and 5.1B active[^8]. Memory still has to hold *all* the experts, but compute — and therefore speed — tracks the active count.',
+    },
+    {
+      type: 'p',
+      text: 'llama.cpp exploits this with `--n-cpu-moe N`, which keeps the expert weights of the first N layers in system RAM while attention and shared weights stay on the GPU[^2]. Experts are touched sparsely, so the PCIe penalty is far smaller than offloading dense layers — a 24 GB card can serve MoE models that would never fit outright.',
+    },
+    { type: 'h2', id: 'runtimes', text: 'Pick a runtime' },
+    {
+      type: 'table',
+      caption: 'The four runtimes worth knowing in 2026.',
+      head: ['Runtime', 'Best for', 'Serves'],
+      rows: [
+        ['**Ollama**', 'The fastest path from zero to a working model; desktop and dev servers', 'OpenAI-compatible API on `127.0.0.1:11434`[^1]'],
+        ['**llama.cpp** (`llama-server`)', 'Full control: offload, cache types, MoE placement, grammar-constrained output', 'OpenAI-compatible `/v1/chat/completions`, `/v1/embeddings` on :8080[^2]'],
+        ['**LM Studio**', 'A GUI for browsing, comparing and serving models; MLX engine on Apple Silicon', 'OpenAI-compatible local server'],
+        ['**vLLM**', 'Many concurrent users on data-centre GPUs', 'OpenAI-compatible server on :8000 with PagedAttention batching[^3][^11]'],
+      ],
+    },
+    {
+      type: 'p',
+      text: 'vLLM’s advantage is **PagedAttention**: it stores the KV cache in fixed-size blocks mapped through a block table, like virtual memory pages, which nearly eliminates fragmentation and lets it batch far more concurrent sequences into the same GPU[^3]. For one developer on one machine, that advantage disappears — use Ollama or llama.cpp.',
+    },
+    {
+      type: 'p',
+      text: 'One more speed lever applies everywhere: **speculative decoding**. A small draft model proposes several tokens, and the large model verifies them in a single forward pass, accepting the longest matching run. Outputs are identical to normal sampling, but generation can be substantially faster when the draft agrees often — as it does on boilerplate-heavy code[^10]. llama.cpp and vLLM both support it.',
+    },
+    { type: 'h2', id: 'setup', text: 'A setup that works tonight' },
+    {
+      type: 'p',
+      text: 'Install Ollama, pull a model sized for your memory, and — the step everybody skips — raise the context length. The Ollama FAQ documents a 4,096-token default, which silently truncates any real code question[^1].',
+    },
+    {
+      type: 'code',
+      lang: 'shell',
+      filename: 'terminal',
+      code: '# Persistent server settings (macOS: launchctl setenv; Linux: systemd override)\nexport OLLAMA_CONTEXT_LENGTH=32768\nexport OLLAMA_FLASH_ATTENTION=1\nexport OLLAMA_KV_CACHE_TYPE=q8_0\nexport OLLAMA_KEEP_ALIVE=30m\n\nollama pull gpt-oss:20b\nollama ps   # should report 100% GPU — anything else means it spilled to RAM',
+      caption: 'Each of these variables is documented in the Ollama FAQ, including the q8_0 / q4_0 cache types and the 5-minute default keep-alive[^1].',
+    },
+    {
+      type: 'p',
+      text: 'Pin per-model settings with a Modelfile so every client gets the same behaviour:',
+    },
+    {
+      type: 'code',
+      lang: 'text',
+      filename: 'Modelfile',
+      code: 'FROM gpt-oss:20b\nPARAMETER num_ctx 32768\nPARAMETER temperature 0.2\nSYSTEM You are a concise senior engineer. Answer with code first, explanation second.',
+    },
+    {
+      type: 'code',
+      lang: 'shell',
+      filename: 'terminal',
+      code: 'ollama create local-coder -f Modelfile\n\ncurl http://localhost:11434/v1/chat/completions \\\n  -H "Content-Type: application/json" \\\n  -d \'{"model":"local-coder","messages":[{"role":"user","content":"Explain this regex: ^(?=.*\\\\d).{8,}$"}]}\'',
+      caption: 'Because the endpoint is OpenAI-compatible, any editor or SDK that accepts a custom base URL can use it.',
+    },
+    {
+      type: 'p',
+      text: 'When you outgrow Ollama’s defaults, the same GGUF runs directly under `llama-server` with every knob exposed:',
+    },
+    {
+      type: 'code',
+      lang: 'shell',
+      filename: 'terminal',
+      code: 'llama-server -hf ggml-org/gpt-oss-20b-GGUF \\\n  --ctx-size 32768 \\\n  --n-gpu-layers all \\\n  --flash-attn on \\\n  --cache-type-k q8_0 --cache-type-v q8_0 \\\n  --parallel 2 --jinja \\\n  --host 127.0.0.1 --port 8080',
+      caption: '`-hf` downloads straight from Hugging Face; `--jinja` applies the model’s own chat template, which tool calling needs[^2].',
+    },
+    { type: 'h2', id: 'models', text: 'Which model for which machine' },
+    {
+      type: 'table',
+      caption: 'Starting points by memory tier, drawn from what the Ollama library lists at the time of writing[^9]. Always check the licence before shipping.',
+      head: ['Fast memory', 'Good fits', 'Context to aim for'],
+      rows: [
+        ['8 GB VRAM / 16 GB Mac', '7–9B dense models at Q4_K_M (Qwen 3.5, Llama 3.1 8B)', '8–16k'],
+        ['12–16 GB', 'gpt-oss-20b (MoE), Gemma 4 12B at Q5/Q6', '16–32k'],
+        ['24 GB', '27–31B dense at Q4_K_M (Qwen 3.6 27B, Gemma 4 31B); Qwen3-Coder 30B (MoE)', '32k with a q8_0 cache'],
+        ['48 GB+ / 64 GB+ Mac', '70B-class dense at Q4, or large MoE with `--n-cpu-moe`', '32–64k'],
+      ],
+    },
+    { type: 'h2', id: 'security', text: 'Do not expose it' },
+    {
+      type: 'callout',
+      tone: 'warning',
+      title: 'Local servers have no authentication',
+      text: 'Ollama binds to `127.0.0.1:11434` by default[^1]; keep it that way. Setting `OLLAMA_HOST=0.0.0.0` on a laptop at a café publishes an unauthenticated model server — and the prompts you send it — to everyone on the network. If you need remote access, put it behind an authenticating reverse proxy or a private network such as a WireGuard tunnel.',
+    },
+    {
+      type: 'p',
+      text: 'Size the cache, check `ollama ps` for 100% GPU, keep it on localhost — and you have a private, offline model that answers in milliseconds and never sends your code anywhere.',
+    },
+  ],
+  references: [
+    { id: 1, title: 'Ollama FAQ — context length, keep-alive, flash attention, KV cache types, host binding', publisher: 'Ollama docs', url: 'https://docs.ollama.com/faq' },
+    { id: 2, title: 'llama.cpp HTTP server (llama-server) README', publisher: 'ggml-org/llama.cpp', url: 'https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md' },
+    { id: 3, title: 'Efficient Memory Management for Large Language Model Serving with PagedAttention (Kwon et al., SOSP 2023)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2309.06180' },
+    { id: 4, title: 'GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints (Ainslie et al.)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2305.13245' },
+    { id: 5, title: 'FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness (Dao et al.)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2205.14135' },
+    { id: 6, title: 'AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration (Lin et al.)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2306.00978' },
+    { id: 7, title: 'GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers (Frantar et al.)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2210.17323' },
+    { id: 8, title: 'Introducing gpt-oss', publisher: 'OpenAI', url: 'https://openai.com/index/introducing-gpt-oss/' },
+    { id: 9, title: 'Model library', publisher: 'Ollama', url: 'https://ollama.com/library' },
+    { id: 10, title: 'Fast Inference from Transformers via Speculative Decoding (Leviathan et al.)', publisher: 'arXiv', url: 'https://arxiv.org/abs/2211.17192' },
+    { id: 11, title: 'vLLM documentation', publisher: 'vLLM', url: 'https://docs.vllm.ai/' },
+    { id: 12, title: 'Llama 3.1 8B model card and configuration', publisher: 'Hugging Face', url: 'https://huggingface.co/meta-llama/Llama-3.1-8B' },
+  ],
+}

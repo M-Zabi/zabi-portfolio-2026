@@ -3,6 +3,7 @@
 import GameLeaderboard from '@/components/about/GameLeaderboard.vue'
 import RigPanel from '@/components/about/RigPanel.vue'
 import TechToolbox from '@/components/about/TechToolbox.vue'
+import ArrowLink from '@/components/common/ArrowLink.vue'
 import PageHero from '@/components/common/PageHero.vue'
 import SectionHeading from '@/components/common/SectionHeading.vue'
 import AppMark from '@/components/layout/AppMark.vue'
@@ -49,6 +50,10 @@ usePageMeta(pages.about)
         <FadeIn as="p" :delay="0.16" class="text-muted-foreground">
           I work best as an embedded senior engineer, or as the person who takes a product from prototype to launch:
           the API, the motion system and the release pipeline, shipped by one pair of hands.
+        </FadeIn>
+        <FadeIn :delay="0.2" class="flex flex-wrap gap-x-8 gap-y-2 pt-2">
+          <ArrowLink :to="{ path: '/contact', query: { intent: 'resume' } }" label="Get my résumé" />
+          <ArrowLink to="/contact" label="Start a project" />
         </FadeIn>
         <div class="pt-4">
           <FadeIn as="h2" :y="10" :delay="0.2" class="text-label text-muted-foreground">(Toolbox)</FadeIn>

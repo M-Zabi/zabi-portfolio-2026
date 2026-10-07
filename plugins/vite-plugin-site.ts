@@ -1,10 +1,12 @@
+import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 import { type IndexHtmlTransformContext, loadEnv, type Plugin, type ResolvedConfig } from 'vite'
 
-import { documentTitle, ogImage, type PageMeta, pages, projectPage } from '../src/config/seo'
+import { documentTitle, ogImage, type PageMeta, pages, postPage, projectPage } from '../src/config/seo'
 import { site } from '../src/config/site'
+import { posts } from '../src/content/blog'
 import { experience, games, rig, rotation, testimonials } from '../src/content/profile'
 import { projects } from '../src/content/projects'
 import { WEATHER_ENDPOINT } from '../src/services/weather'
@@ -27,6 +29,9 @@ const MARKER = '<!-- site:head -->'
 interface Page extends PageMeta {
   path: string
   noindex?: boolean
+  /** Articles: ISO dates for the `article:*` tags. */
+  publishedAt?: string
+  updatedAt?: string
 }
 
 function escapeHtml(value: string): string {
@@ -43,12 +48,14 @@ function routes(): Page[] {
     { path: '/work', ...pages.work },
     ...projects.map((project) => ({ path: `/work/${project.slug}`, ...projectPage(project) })),
     { path: '/about', ...pages.about },
+    { path: '/blog', ...pages.blog },
+    ...posts.map((post) => ({ path: `/blog/${post.slug}`, ...postPage(post) })),
     { path: '/contact', ...pages.contact },
   ]
 }
 
 /** Every reason the current content is not ready to publish. */
-export function contentIssues(siteUrl: string): string[] {
+export function contentIssues(siteUrl: string, publicDir?: string): string[] {
   const issues: string[] = []
   if (!siteUrl || /example\.com/i.test(siteUrl)) {
     issues.push('VITE_SITE_URL is not set to your real domain (e.g. https://yourname.dev).')
@@ -70,6 +77,9 @@ export function contentIssues(siteUrl: string): string[] {
   for (const [count, label, file] of samples) {
     if (count > 0) issues.push(`${count} ${label} still marked \`sample: true\` — replace or delete them in ${file}`)
   }
+  if (publicDir && !existsSync(join(publicDir, site.resume.href.replace(/^\//, '')))) {
+    issues.push(`No résumé at public${site.resume.href} — the résumé assistant on /contact has nothing to hand over.`)
+  }
   return issues
 }
 
@@ -78,6 +88,14 @@ function headTags(page: Page, siteUrl: string): string {
   const title = escapeHtml(documentTitle(page.title))
   const description = escapeHtml(page.description)
   const image = `${siteUrl}${ogImage.path}`
+  const article =
+    page.type === 'article' && page.publishedAt
+      ? [
+          `<meta property="article:published_time" content="${page.publishedAt}" />`,
+          `<meta property="article:modified_time" content="${page.updatedAt ?? page.publishedAt}" />`,
+          `<meta property="article:author" content="${escapeHtml(site.fullName)}" />`,
+        ]
+      : []
   const tags = [
     `<title>${title}</title>`,
     `<meta name="description" content="${description}" />`,
@@ -94,6 +112,7 @@ function headTags(page: Page, siteUrl: string): string {
     '<meta name="twitter:card" content="summary_large_image" />',
     `<meta name="twitter:title" content="${title}" />`,
     `<meta name="twitter:description" content="${description}" />`,
+    ...article,
     `<meta name="twitter:image" content="${image}" />`,
   ]
   return tags.join('\n    ')
@@ -126,16 +145,19 @@ function structuredData(siteUrl: string): string {
   return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`
 }
 
-function contentSecurityPolicy(contactEndpoint: string | undefined): string {
-  // The footer's weather report (src/services/weather.ts) reads from Open-Meteo.
-  let connect = `'self' ${new URL(WEATHER_ENDPOINT).origin}`
-  if (contactEndpoint) {
+function contentSecurityPolicy(endpoints: (string | undefined)[]): string {
+  // The footer's weather report (src/services/weather.ts) reads from Open-Meteo; the contact,
+  // engagement and summary services add their own origins when configured.
+  const origins = new Set([new URL(WEATHER_ENDPOINT).origin])
+  for (const endpoint of endpoints) {
+    if (!endpoint) continue
     try {
-      connect += ` ${new URL(contactEndpoint).origin}`
+      origins.add(new URL(endpoint).origin)
     } catch {
-      // Invalid URL — the contact service will report it; keep the policy strict.
+      // Invalid URL — the service will report it; keep the policy strict.
     }
   }
+  const connect = `'self' ${[...origins].join(' ')}`
   return [
     "default-src 'self'",
     "script-src 'self'",
@@ -172,7 +194,8 @@ function sitemap(siteUrl: string, all: Page[]): string {
 export function sitePlugin(): Plugin {
   let config: ResolvedConfig
   let siteUrl = ''
-  let contactEndpoint: string | undefined
+  let endpoints: (string | undefined)[] = []
+  let engagementEndpoint: string | undefined
 
   return {
     name: 'portfolio:site',
@@ -181,12 +204,16 @@ export function sitePlugin(): Plugin {
       config = resolved
       const env = loadEnv(resolved.mode, resolved.root, 'VITE_')
       siteUrl = (env.VITE_SITE_URL || site.url).replace(/\/+$/, '')
-      contactEndpoint = env.VITE_CONTACT_ENDPOINT || undefined
+      endpoints = [env.VITE_CONTACT_ENDPOINT, env.VITE_ENGAGEMENT_ENDPOINT, env.VITE_SUMMARY_ENDPOINT]
+      engagementEndpoint = env.VITE_ENGAGEMENT_ENDPOINT || undefined
     },
 
     buildStart() {
       if (config.command !== 'build') return
-      const issues = contentIssues(siteUrl)
+      const issues = contentIssues(siteUrl, config.publicDir)
+      if (!engagementEndpoint) {
+        issues.push('VITE_ENGAGEMENT_ENDPOINT is not set — blog hearts and comments stay in each visitor’s browser.')
+      }
       if (!issues.length) return
       this.warn(`Placeholder content is shipping:\n  • ${issues.join('\n  • ')}\n`)
     },
@@ -198,7 +225,7 @@ export function sitePlugin(): Plugin {
         const build = config.command === 'build' && context.bundle
         // A CSP meta tag only governs what follows it, so it leads the head.
         const tags = [
-          build ? `<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy(contactEndpoint)}" />` : '',
+          build ? `<meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy(endpoints)}" />` : '',
           headTags(home, siteUrl || 'http://localhost'),
           build ? fontPreloads(context.bundle!, config.base) : '',
           structuredData(siteUrl || 'http://localhost'),
